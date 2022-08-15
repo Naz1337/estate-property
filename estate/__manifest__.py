@@ -5,5 +5,8 @@
     ],
     'description': "Bagu Bagu",
     'installable': True,
-    'application': True
+    'application': True,
+    "data": [
+        "security/ir.model.access.csv"
+    ]
 }
