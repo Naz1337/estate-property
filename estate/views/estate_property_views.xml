@@ -11,6 +11,7 @@
         <field name="arch" type="xml">
             <tree string="Channel">
                 <field name="name" />
+                <field name="tag_ids" widget="many2many_tags" />
                 <field name="postcode" />
                 <field name="bedrooms" />
                 <field name="living_area" />
@@ -27,6 +28,8 @@
             <form>
                 <h1>
                     <field name="name" />
+                    <br />
+                    <field name="tag_ids" widget="many2many_tags" />
                 </h1>
                 <group col="4">
                     <field name="postcode" />
@@ -45,6 +48,15 @@
                             <field name="garden" />
                             <field name="garden_area" />
                             <field name="garden_orientation" />
+                        </group>
+                    </page>
+                    <page string="Offers">
+                        <field name="offer_ids" />
+                    </page>
+                    <page string="Other Info">
+                        <group>
+                            <field name="salesperson" />
+                            <field name="buyer" />
                         </group>
                     </page>
                 </notebook>
@@ -66,6 +78,59 @@
                 <filter name="avail_prop_filter" string="Available Properties" domain="['|', ('state', '=', 'new'), ('state', '=', 'offer_received')]" />
                 <filter string="Postcode" name="group_by_postcode" context="{'group_by': 'postcode'}" />
             </search>
+        </field>
+    </record>
+
+    <record id="estate_property_type_action" model="ir.actions.act_window">
+        <field name="name">Property Types</field>
+        <field name="res_model">estate.property.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="estate_property_type_view_form" model="ir.ui.view">
+        <field name="name">estate.property.type.form</field>
+        <field name="model">estate.property.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <h1><field name="name" /></h1>
+            </form>
+        </field>
+    </record>
+    <record id="estate_property_tag_action" model="ir.actions.act_window">
+        <field name="name">Property Tags</field>
+        <field name="res_model">estate.property.tag</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="estate_property_tag_view_form" model="ir.ui.view">
+        <field name="name">estate.property.tag.form</field>
+        <field name="model">estate.property.tag</field>
+        <field name="arch" type="xml">
+            <form>
+                <h1><field name="name" /></h1>
+            </form>
+        </field>
+    </record>
+    <record id="estate_property_offer_view_form" model="ir.ui.view">
+        <field name="name">estate.property.offer.form</field>
+        <field name="model">estate.property.offer</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="price" />
+                    <field name="partner_id" />
+                    <field name="status" />
+                </group>
+            </form>
+        </field>
+    </record>
+    <record id="estate_property_offer_view_tree" model="ir.ui.view">
+        <field name="name">estate.property.offer.tree</field>
+        <field name="model">estate.property.offer</field>
+        <field name="arch" type="xml">
+            <tree string="Offers">
+                <field name="price" />
+                <field name="partner_id" />
+                <field name="status" />
+            </tree>
         </field>
     </record>
 </odoo>
