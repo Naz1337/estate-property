@@ -28,4 +28,28 @@ class EstatePropertyOffer(models.Model):
     def _set_deadline(self):
         for record in self:
             record.validity = (record.date_deadline - record.create_date.date()).days
+            
+    def do_accept(self):
+        for record in self:
+            record.property_id.selling_price = record.price
+            record.status = "accepted"
+            
+            record.property_id.buyer = record.partner_id
+            
+            for offer in self.mapped("property_id.offer_ids"):
+                if offer == record:
+                    continue
+                
+                offer.status = "refused"
+
+        return True
+
+    def do_reject(self):
+        for record in self:
+            record.status = "refused"
+            
+            if record.property_id.buyer == record.partner_id:
+                record.property_id.buyer = False
+        
+        return True
     
