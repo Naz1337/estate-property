@@ -5,6 +5,8 @@ from dateutil.relativedelta import relativedelta
 class EstatePropertyOffer(models.Model):
     _name = "estate.property.offer"
     _description = "Holding offers!"
+    _sql_constraints = [
+        ("pos_off_price", "CHECK (price > 0)", "Offering Price must be above zero!")]
     
     price = fields.Float()
     status = fields.Selection(
@@ -50,6 +52,7 @@ class EstatePropertyOffer(models.Model):
             
             if record.property_id.buyer == record.partner_id:
                 record.property_id.buyer = False
-        
+
+            # record.property_id.selling_price = 0.
         return True
     

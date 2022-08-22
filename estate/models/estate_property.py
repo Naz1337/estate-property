@@ -1,9 +1,12 @@
-from odoo import models, fields, api, exceptions
+from odoo import models, fields, api, exceptions, tools
 from dateutil.relativedelta import relativedelta
 
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "The model of a property!"
+    _sql_constraints = [
+        ("pos_exp_price", "CHECK (expected_price > 0)", "Expected Price must be above zero!"),
+        ("pos_sel_price", "CHECK (selling_price > 0)", "Selling Price must be above zero!")]
     
     name = fields.Char(string="Title", required=True)
     description = fields.Text()
@@ -79,3 +82,10 @@ class EstateProperty(models.Model):
             record.state = "canceled"
         
         return True
+    
+    @api.constrains("selling_price")
+    def _check_expected_price(self):
+        for record in self:
+            minima = record.expected_price * 0.9
+            if tools.float_compare(record.selling_price, minima, precision_digits=2) < 1:
+                raise exceptions.ValidationError("Selling price can not be less than 90% of expected price")
