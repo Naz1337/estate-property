@@ -7,6 +7,7 @@ class EstateProperty(models.Model):
     _sql_constraints = [
         ("pos_exp_price", "CHECK (expected_price > 0)", "Expected Price must be above zero!"),
         ("pos_sel_price", "CHECK (selling_price > 0)", "Selling Price must be above zero!")]
+    _order = "id desc"
     
     name = fields.Char(string="Title", required=True)
     description = fields.Text()
@@ -89,3 +90,10 @@ class EstateProperty(models.Model):
             minima = record.expected_price * 0.9
             if tools.float_compare(record.selling_price, minima, precision_digits=2) < 1:
                 raise exceptions.ValidationError("Selling price can not be less than 90% of expected price")
+            
+    @api.onchange("offer_ids")
+    def _onchange_offer_ids(self):
+        for record in self:
+            if len(record.mapped("offer_ids")) > 0:
+                record.state = "offer_received"
+            

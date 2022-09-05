@@ -7,6 +7,7 @@ class EstatePropertyOffer(models.Model):
     _description = "Holding offers!"
     _sql_constraints = [
         ("pos_off_price", "CHECK (price > 0)", "Offering Price must be above zero!")]
+    _order = "price desc"
     
     price = fields.Float()
     status = fields.Selection(
@@ -17,6 +18,10 @@ class EstatePropertyOffer(models.Model):
     
     validity = fields.Integer(default=7)
     date_deadline = fields.Date(compute="_compute_deadline", inverse="_set_deadline")
+    
+    property_type_id = fields.Many2one(
+        comodel_name="estate.property.type", related="property_id.property_type", string="Property Type", store=True)
+    
     
     @api.depends("create_date", "validity")
     def _compute_deadline(self):
@@ -35,10 +40,11 @@ class EstatePropertyOffer(models.Model):
         for record in self:
             record.property_id.selling_price = record.price
             record.status = "accepted"
+            record.property_id.state = "offer_accepted"
             
             record.property_id.buyer = record.partner_id
             
-            for offer in self.mapped("property_id.offer_ids"):
+            for offer in self.property_id.mapped("offer_ids"):
                 if offer == record:
                     continue
                 
@@ -49,6 +55,11 @@ class EstatePropertyOffer(models.Model):
     def do_reject(self):
         for record in self:
             record.status = "refused"
+            for offer in record.property_id.mapped("offer_ids"):
+                if offer.status == "accepted":
+                    break
+            else:
+                record.property_id.state = "offer_received"
             
             if record.property_id.buyer == record.partner_id:
                 record.property_id.buyer = False
