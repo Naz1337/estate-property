@@ -84,16 +84,36 @@ class EstateProperty(models.Model):
         
         return True
     
+    def reset_state(self):
+        for record in self:
+            for offer in record.offer_ids:
+                offer.status = False
+            
+            record.selling_price = 1
+            record.state = "offer_received"
+        return True
+    
     @api.constrains("selling_price")
     def _check_expected_price(self):
         for record in self:
+            if tools.float_compare(record.selling_price, 1.0, 2) == 0:
+                continue
             minima = record.expected_price * 0.9
             if tools.float_compare(record.selling_price, minima, precision_digits=2) < 1:
                 raise exceptions.ValidationError("Selling price can not be less than 90% of expected price")
             
-    @api.onchange("offer_ids")
-    def _onchange_offer_ids(self):
-        for record in self:
-            if len(record.mapped("offer_ids")) > 0:
-                record.state = "offer_received"
+    # @api.onchange("offer_ids")
+    # def _onchange_offer_ids(self):
+    #     for record in self:
+    #         print("DEBUG MSSG".center(20, '='))
+    #         print(record.name, record.description)
+    #         print(record.salesperson.name)
+    #         print('=' * 20, '\n')
+    #         if len(record.mapped("offer_ids")) > 0:
+    #             record.state = "offer_received"
+                
+    @api.ondelete(at_uninstall=False)
+    def _delete_except_issold_orisaccepeted(self):
+        if any(prop.state not in ("new", "canceled") for prop in self):
+            raise exceptions.UserError("Property that are not New or Canceled can not be deleted!")
             

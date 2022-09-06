@@ -31,6 +31,7 @@
                 <header>
                     <button name="do_sold" type="object" string="Sold" states="offer_accepted" />
                     <button name="do_cancel" type="object" string="Cancel" states="offer_accepted" />
+                    <button name="reset_state" type="object" string="Reset" />
                     <field name="state" widget="statusbar" statusbar_visible="new,offer_received,offer_accepted,sold" />
                 </header>
                 <h1>
@@ -203,6 +204,18 @@
                 <button name="do_reject" type="object" icon="fa-times" attrs="{'invisible': ['!', ('status', '=', False)]}" />
                 <field name="status" invisible="True" />
             </tree>
+        </field>
+    </record>
+    <record id="view_users_form" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.estate</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page name="estate_properties" string="Real Estate Properties">
+                    <field name="property_ids"/>
+                </page>
+            </notebook>
         </field>
     </record>
 </odoo>

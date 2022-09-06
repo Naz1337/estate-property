@@ -1,5 +1,5 @@
 from datetime import datetime
-from odoo import fields, models, api
+from odoo import fields, models, api, exceptions
 from dateutil.relativedelta import relativedelta
 
 class EstatePropertyOffer(models.Model):
@@ -66,4 +66,16 @@ class EstatePropertyOffer(models.Model):
 
             # record.property_id.selling_price = 0.
         return True
+    
+    @api.model
+    def create(self, vals: dict):
+        # vals -> {'price': 600,
+        # 'partner_id': 26, 'validity': 7, 
+        # 'date_deadline': '2022-09-12', 
+        # 'status': False, 'property_id': 12}
+        max_offer_price = max(offer.price for offer in self.env["estate.property"].browse(vals['property_id']).offer_ids)
+        
+        if vals['price'] < max_offer_price:  # TODO: use odoo float util
+            raise exceptions.UserError(f"Can not offer less than the current highest offer! {max_offer_price}")
+        return super().create(vals)
     
